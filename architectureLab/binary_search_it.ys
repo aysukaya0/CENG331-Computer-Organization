@@ -1,0 +1,78 @@
+# HÜSNA AYSU KAYA 2521706
+
+.pos 0x0
+init:
+    irmovq stack, %rsp
+    irmovq $6, %rdx
+    irmovq array_begin, %rdi
+    irmovq array_end, %rsi
+    call binary_search
+    halt
+
+#implement your code below (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+binary_search:
+    rrmovq %rdi, %rcx      #rcx:initial_begin  rdi:begin rsi:end rdx:value
+    rrmovq %rsi, %r8
+    subq %rdi, %r8          #r8:end - begin 
+    jle return
+    irmovq $16, %r12
+    irmovq $2, %r9
+    irmovq $8, %r11
+    jmp loop
+
+loop:
+    rrmovq %rsi, %r8
+    subq %rdi, %r8          #r8:end - begin 
+    jle return
+    rrmovq %rsi, %rbx
+    subq %rdi, %rbx           
+    dvvq %r12, %rbx
+    mllq %r11, %rbx
+    addq %rdi, %rbx         #rbx: mid
+    mrmovq (%rbx), %r10         #r10: mid
+    subq %rdx, %r10         #mid-value
+    je if
+    jl elseif
+    jg else
+
+if:
+    rrmovq %rbx, %rax
+    subq %rcx, %rax           #return mid - in_begin + 1
+    addq %r11, %rax
+    dvvq %r11, %rax
+    ret
+
+elseif:
+    rrmovq %rbx, %rdi
+    addq %r11, %rdi           #begin = mid + 1
+    jmp loop
+
+else:
+    rrmovq %rbx, %rsi        #end = mid
+    jmp loop
+
+return:
+    irmovq $-1, %rax
+    ret
+
+
+#implement your code above (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+.pos 0x1008
+array_begin:
+    .quad 1
+    .quad 2
+    .quad 3
+    .quad 5
+    .quad 6
+    .quad 7
+    .quad 9
+    .quad 11
+array_end:
+    .quad 0
+.pos 0x1F00
+stack:
+    .quad 0
+
+

@@ -1,0 +1,137 @@
+# HÜSNA AYSU KAYA 2521706
+
+# In former version of the code, eight jump instructions were used to determine the case that should be performed in switch. For each case, the value that was
+# calculated after the mod operation was compared with the values for cases. To eliminate the number of trials and jump instructions, I used jtab instruction. 
+# Since jtab takes a constant value and a register to update the program counter, it can be used for such purpose. I created a switch table to keep the cases 
+# in line. It means the address of the begining of the switch table is the address of the case0. The result of the mod calculation is stored in register $r8.
+# If we multiply this by eight, we obtain the offset of the address. For example, for case3, the value in $r8 is 4. We multiply this by 8 and 
+# get 24. If we add address of the switch table to 24, we get the address of case3. To get this for every cases,  I added "mllq %r12, %r8" and 
+# "jtab switch_table, %r8" instructions and delete all the jump instructions.
+
+.pos 0x0
+	irmovq stack, %rsp  	# Set up stack pointer  
+    irmovq array_begin1, %rdi
+    irmovq array_begin2, %rsi
+    irmovq $16, %rdx
+    call switch8
+    halt
+
+#implement your code below (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+switch8:
+loop:
+    andq %rdx, %rdx                     #length is 0, don't enter the loop
+    jle done:
+    mrmovq (%rdi), %r8                  #r8: *begin1
+    mrmovq (%rdi), %r11                 #r11: *begin1
+    irmovq $8, %r12                     #r12: 8
+    modq %r12, %r8                      #r8: *begin1 % 8
+    mllq %r12, %r8                      #r8: C
+    jtab switch_table, %r8              #jump to rbx+C
+    cases_over:
+    irmovq $16, %r10
+    addq %r10, %r11
+    rmmovq %r11, (%rsi)
+    irmovq $1, %r10
+    subq %r10, %rdx
+    irmovq $8, %r10
+    addq %r10, %rdi 
+    addq %r10, %rsi
+    jmp loop
+
+done:
+ret
+
+
+switch_table:
+    .quad case0
+    .quad case1
+    .quad case2
+    .quad case3
+    .quad case4
+    .quad case5
+    .quad case6
+    .quad case7
+
+
+
+
+#0 -> add 1
+case0:
+irmovq $1, %r10
+addq %r10, %r11
+jmp cases_over
+
+#1 -> multiply by 5
+case1:
+irmovq $5, %r10
+mllq %r10, %r11
+jmp cases_over
+
+#2 -> divide by 2
+case2:
+irmovq $2, %r10
+dvvq %r10, %r11
+jmp cases_over
+
+#3 -> take mod 3
+case3:
+irmovq $3, %r10
+modq %r10, %r11
+jmp cases_over
+
+#4 -> subtract 7
+case4:
+irmovq $7, %r10
+subq %r10, %r11
+jmp cases_over
+
+#5 -> make it 331
+case5:
+irmovq $331, %r11
+jmp cases_over
+
+#6 -> add 10
+case6:
+irmovq $10, %r10
+addq %r10, %r11
+jmp cases_over
+
+#7 -> divide by 3
+case7:
+irmovq $3, %r10
+dvvq %r10, %r11
+jmp cases_over
+
+
+
+#implement your code above (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+.pos 0x1008
+array_begin1:
+    .quad 0
+    .quad 1
+    .quad 2
+    .quad 3
+    .quad 4
+    .quad 5
+    .quad 6
+    .quad 7
+    .quad 8
+    .quad 9
+    .quad 10
+    .quad 11
+    .quad 12
+    .quad 13
+    .quad 14
+    .quad 15
+array_end1:
+    .quad 0
+.pos 0x1500
+array_begin2:
+    .quad 0
+.pos 0x1F00
+stack:
+    .quad 0
+
+
